@@ -2,6 +2,8 @@ const axios = require("axios");
 const db = require("../db/index")
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
+const {TOKEN_SECRET} = require("../middlewares/verify")
+
 
 
 /* Imagenes de los pokemons */
