@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 
 
-/* Imagenes de los pokemons */ 
+/* Imagenes de los pokemons */
 
 // import aron from "./img/aron.png"
 // import bulbasur from "./img/bulbasaur.png"
@@ -164,7 +164,7 @@ const pokemons = [
     }
     ,
     {
-         img: "mew",
+        img: "mew",
         name: "Mew",
         id: "#152",
         elements: {
@@ -278,11 +278,11 @@ const getPokemonsApi = async (req, res, next) => {
 
         return res.status(200).json({ success: true, data: pokemonElement, message: "Pokemons obtenidos" });
     } catch (error) {
-        return next (error)  
+        return next(error)
     }
 };
 
-/* CREATE POKEMON A MEDIAS, CREO QUE TAMPOCO ESTA TERMINADO JEJE */ 
+/* CREATE POKEMON A MEDIAS, TODAVIA NO FUNCIONA */
 
 const createPokemon = async (req, res, next) => {
     try {
@@ -307,14 +307,12 @@ const createPokemon = async (req, res, next) => {
 
 
 /* GET DE USUARIOS QUE VAN A ESTAR EN LA BASE DE DATOS,
-NO HAY QUE HACER UN POST DE USUARIOS. LOS USUARIOS LOS AGREGAMOS DIRECTAMENTE DESDE LA BASE DE DATOS.  */ 
+NO HAY QUE HACER UN POST DE USUARIOS. LOS USUARIOS LOS AGREGAMOS DIRECTAMENTE DESDE LA BASE DE DATOS.  */
 
 const getUsers = async (req, res, next) => {
     try {
         const getUsersFromSql = await db.query("Select * From usuarios");
         return res.status(200).json({ success: true, data: getUsersFromSql.rows, message: "Usuarios obtenidos" });
-
-        // return res.send(usuarios)
     } catch (error) {
         return next(error)
     }
@@ -322,8 +320,7 @@ const getUsers = async (req, res, next) => {
 
 
 
-
-/* LOGIN DE USUARIOS, no esta terminado CREO. */
+/* LOGIN DE USUARIOS, TERMINADO */
 const login = async (req, res, next) => {
     try {
         const { mail, password } = req.body
@@ -346,16 +343,24 @@ const login = async (req, res, next) => {
             });
         }
 
-        const validPassword = await bcrypt.compare(password, user.rows[0].password);
+        const ROUNDS = 10;
+
+        const passwordHashed = await bcrypt.hash(user.rows[0].password, ROUNDS);
+
+        const validPassword = await bcrypt.compare(password, passwordHashed);
+
 
         if (!validPassword) {
             return res.status(401).json({ success: false, data: [], message: "Quien sos?" })
         }
 
+
         const token = jwt.sign({
             name: user.rows[0].name,
             mail: user.rows[0].mail,
         }, TOKEN_SECRET)
+
+        console.log(token)
 
         return res.status(200).json({ success: true, data: user.rows[0], message: "Exito", token })
     } catch (error) {
@@ -365,4 +370,4 @@ const login = async (req, res, next) => {
 
 
 
-module.exports = { getPokemonsApi, createPokemon, getUsers,login}
+module.exports = { getPokemonsApi, createPokemon, getUsers, login }
