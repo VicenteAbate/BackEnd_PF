@@ -239,7 +239,10 @@ const pokemons = [
 ]
 
 
-
+/* Para este queda resolver dos cosas: 
+1- Cuando se traen los elementos (element1 & element2) viene repetido el element1
+ (Se puede ver cuando se hace el GET.), hay que ver la forma de hacer que vengan los dos elementos.
+2- Queda por hacer el FOR que recorra toda la base de datos y traiga todos los pokemons.   */ 
 
 const getPokemonsApi = async (req, res, next) => {
     try {
@@ -284,28 +287,29 @@ const getPokemonsApi = async (req, res, next) => {
     }
 };
 
-/* CREATE POKEMON A MEDIAS, TODAVIA NO FUNCIONA */
 
-const createPokemon = async (req, res, next) => {
+
+/* Get y post pokemon que funciona con array de objetos Pokemons */
+
+const getPokeObjetTest = (req, res, next) => {
     try {
-        const newPokemon = req.body;
-        if (!newPokemon.name || !newPokemon.id || !newPokemon.abilities) {
-            return res.send({ success: false, data: [], message: "No dejar campos vacios" })
-        };
-
-        const existePokemon = newPokemon.rowCount > 0
-        if (existePokemon) {
-            return res.send
-                ({ success: false, data: [], message: "Ya existe ese pokemon!" })
-        };
-        const createdPokemon = await db.query("Insert into pokemons(name, id, abilities) values($1, $2, $3)",
-            [newPokemon.name, newPokemon.id, newPokemon.abilities]);
-
-        return res.status(201).json({ success: true, data: createdPokemon, message: ":D" })
+        return res.send(pokemons);
     } catch (error) {
         return next(error);
     }
-};
+}
+
+
+/* El createPokemon funciona pero solo agrega en el array de pokemons ("Pokemons.js" que usamos para pokedex de react). Falta poder agregar pokemons a la base de datos desde aca */
+const createPokemon = (req, res, next) => {
+    try {
+        const nuevoPokemon = req.body;
+        pokemons.push(req.body)
+        return res.send({ success: true, data: nuevoPokemon, message: "Pokemon se agrego con exito" });
+    } catch (error) {
+        return next(error);
+    }
+}
 
 
 /* GET DE USUARIOS QUE VAN A ESTAR EN LA BASE DE DATOS,
@@ -372,4 +376,4 @@ const login = async (req, res, next) => {
 
 
 
-module.exports = { getPokemonsApi, createPokemon, getUsers, login }
+module.exports = { getPokemonsApi, createPokemon, getUsers, login, getPokeObjetTest }

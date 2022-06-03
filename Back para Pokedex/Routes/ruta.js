@@ -1,11 +1,14 @@
 const express = require('express')
 const router = express.Router();
 const axios = require("axios");
-const {getPokemonsApi,createPokemon,getUsers,login} = require ("../controller/control")
+const { getPokemonsApi, getUsers, login, createPokemon, getPokeObjetTest } = require("../controller/control")
 
 
 router.get("/", getPokemonsApi)
-router.post("/", createPokemon)
+
+
+router.get("/ArrayPokemons", getPokeObjetTest);
+router.post("/ArrayPokemons", createPokemon)
 
 
 router.get("/usuarios", getUsers)
