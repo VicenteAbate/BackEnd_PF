@@ -2,7 +2,7 @@ const axios = require("axios");
 const db = require("../db/index")
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
-const {TOKEN_SECRET} = require("../middlewares/verify")
+const { TOKEN_SECRET } = require("../middlewares/verify")
 
 
 
@@ -239,42 +239,41 @@ const pokemons = [
 ]
 
 
-/* Para este queda resolver dos cosas: 
-1- Cuando se traen los elementos (element1 & element2) viene repetido el element1
- (Se puede ver cuando se hace el GET.), hay que ver la forma de hacer que vengan los dos elementos.
-2- Queda por hacer el FOR que recorra toda la base de datos y traiga todos los pokemons.   */ 
-
 const getPokemonsApi = async (req, res, next) => {
     try {
         const pokemonsApiFromSql = await db.query("SELECT * FROM pokemons po INNER JOIN elements el ON po.elemento_1 = el.id_elements INNER JOIN elements e ON po.elemento_2 = e.id_elements INNER JOIN about ab ON po.id_about = ab.id_about INNER JOIN baseStats bs ON po.id_baseStats = bs.id_baseStats");
+        let pokemonElement = []
 
-        // const constParaPokemons: pokemonElement = [pokemonsApiFromSql.rows.id_pokemon]
-        console.log(pokemonsApiFromSql.rows[0])
-        const pokemonElement = [
-            {
-                img: pokemonsApiFromSql.rows[0].img,
-                name: pokemonsApiFromSql.rows[0].name_pokemon,
-                id: pokemonsApiFromSql.rows[0].id_pokemon,
-                elements: {
-                    element1: pokemonsApiFromSql.rows[0].nameelements,
-                    element2: pokemonsApiFromSql.rows[0].nameelements,
-                },
-                about: {
-                    weight: pokemonsApiFromSql.rows[0].weight,
-                    height: pokemonsApiFromSql.rows[0].height,
-                    moves: pokemonsApiFromSql.rows[0].moves
-                },
-                info: pokemonsApiFromSql.rows[0].info_pokemon,
-                baseStats: {
-                    hp: pokemonsApiFromSql.rows[0].hp,
-                    atk: pokemonsApiFromSql.rows[0].atk,
-                    def: pokemonsApiFromSql.rows[0].def,
-                    satk: pokemonsApiFromSql.rows[0].satk,
-                    sdef: pokemonsApiFromSql.rows[0].sdef,
-                    spd: pokemonsApiFromSql.rows[0].spd
+        for (let index = 0; index < pokemonsApiFromSql.rows.length; index++) {
+            pokemonElement.push(
+                {
+                    img: pokemonsApiFromSql.rows[index].img,
+                    name: pokemonsApiFromSql.rows[index].name_pokemon,
+                    id: pokemonsApiFromSql.rows[index].id_pokemon,
+                    elements: {
+                        element1: pokemonsApiFromSql.rows[index].nameelements,
+                        element2: pokemonsApiFromSql.rows[index].nameelements,
+                    },
+                    about: {
+                        weight: pokemonsApiFromSql.rows[index].weight,
+                        height: pokemonsApiFromSql.rows[index].height,
+                        moves: pokemonsApiFromSql.rows[index].moves
+                    },
+                    info: pokemonsApiFromSql.rows[index].info_pokemon,
+                    baseStats: {
+                        hp: pokemonsApiFromSql.rows[index].hp,
+                        atk: pokemonsApiFromSql.rows[index].atk,
+                        def: pokemonsApiFromSql.rows[index].def,
+                        satk: pokemonsApiFromSql.rows[index].satk,
+                        sdef: pokemonsApiFromSql.rows[index].sdef,
+                        spd: pokemonsApiFromSql.rows[index].spd
+                    }
                 }
-            }
-        ]
+            )
+        }
+
+
+
 
         /* Pudimos traer los datos desde la base de datos, venian desordenados entonces creamos un form que es pokemonElement
         para darle la forma que nosotros queremos (la forma que vamos a usar es igual a el array que habiamos hecho nosotoros).
@@ -286,7 +285,6 @@ const getPokemonsApi = async (req, res, next) => {
         return next(error)
     }
 };
-
 
 
 /* Get y post pokemon que funciona con array de objetos Pokemons */
@@ -319,14 +317,15 @@ const getUsers = async (req, res, next) => {
     try {
         const getUsersFromSql = await db.query("Select * From usuarios");
         return res.status(200).json({ success: true, data: getUsersFromSql.rows, message: "Usuarios obtenidos" });
+
+        // return res.send(usuarios)
     } catch (error) {
         return next(error)
     }
 }
 
 
-
-/* LOGIN DE USUARIOS, TERMINADO */
+/* LOGIN DE USUARIOS, casi terminado, testeando. */
 const login = async (req, res, next) => {
     try {
         const { mail, password } = req.body
