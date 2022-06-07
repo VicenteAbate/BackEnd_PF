@@ -238,6 +238,7 @@ const pokemons = [
 
 ]
 
+//select 
 
 const getPokemonsApi = async (req, res, next) => {
     try {
@@ -245,8 +246,15 @@ const getPokemonsApi = async (req, res, next) => {
         let pokemonElement = []
 
         for (let index = 0; index < pokemonsApiFromSql.rows.length; index++) {
+            const elements = await db.query(
+            `select elements.nameElements, pokemons.name_pokemon 
+            from rel_pokemons_elements, elements, pokemons 
+            where rel_pokemons_elements.pokemon_id = pokemons.id 
+            and rel_pokemons_elements.element_id = elements.id_elements
+            and rel_pokemons_elements.pokemon_id = $1 pokemonsApiFromSql.rows[index].id_pokemon`)
             pokemonElement.push(
                 {
+                    
                     img: pokemonsApiFromSql.rows[index].img,
                     name: pokemonsApiFromSql.rows[index].name_pokemon,
                     id: pokemonsApiFromSql.rows[index].id_pokemon,
