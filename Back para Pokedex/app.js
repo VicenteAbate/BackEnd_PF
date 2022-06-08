@@ -2,7 +2,7 @@ const express = require('express')
 const axios = require("axios");
 const pokeRoutes = require("../Back para Pokedex/Routes/ruta");
 const app = express()
-const cors = require ("cors")
+const cors = require("cors")
 
 const PORT = 3000
 

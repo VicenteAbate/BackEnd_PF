@@ -3,8 +3,6 @@ const db = require("../db/index")
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 const { TOKEN_SECRET } = require("../middlewares/verify")
-const cors = require ("cors")
-
 
 
 
@@ -246,16 +244,29 @@ const getPokemonsApi = async (req, res, next) => {
     try {
         const pokemonsApiFromSql = await db.query("SELECT * FROM pokemons po INNER JOIN about ab ON po.id_about = ab.id_about INNER JOIN baseStats bs ON po.id_baseStats = bs.id_baseStats");
         let pokemonElement = []
-
+        const elements = await db.query(
+            `select elements.nameElements, pokemons.name_pokemon 
+        from rel_pokemons_elements, elements, pokemons 
+        where rel_pokemons_elements.pokemon_id = pokemons.id 
+        and rel_pokemons_elements.element_id = elements.id_elements`
+        )
         for (let index = 0; index < pokemonsApiFromSql.rows.length; index++) {
-            const elements = await db.query(
-                `select elements.nameElements, pokemons.name_pokemon 
-            from rel_pokemons_elements, elements, pokemons 
-            where rel_pokemons_elements.pokemon_id = pokemons.id 
-            and rel_pokemons_elements.element_id = elements.id_elements
-            and rel_pokemons_elements.pokemon_id = $1`,
-                [pokemonsApiFromSql.rows[index].id]
-            )
+            let i = index
+            let element1 = ""
+            let element2 = ""
+            while (i < elements.rows.length) {
+                if (!element1 && elements.rows[i].name_pokemon == pokemonsApiFromSql.rows[index].name_pokemon) {
+                    element1 = elements.rows[i].nameelements;
+                    i++;
+                } else if (elements.rows[i].name_pokemon == pokemonsApiFromSql.rows[index].name_pokemon) {
+                    element2 = elements.rows[i].nameelements
+                    i += elements.rows.length;
+                } else {
+                    i++
+                }
+
+            }
+
             pokemonElement.push(
                 {
 
@@ -263,8 +274,8 @@ const getPokemonsApi = async (req, res, next) => {
                     name: pokemonsApiFromSql.rows[index].name_pokemon,
                     id: pokemonsApiFromSql.rows[index].id_pokemon,
                     elements: {
-                        element1: elements.rows[0].nameElements,
-                        element2: elements.rows[1].nameElements,
+                        element1: element1,
+                        element2: element2,
                     },
                     about: {
                         weight: pokemonsApiFromSql.rows[index].weight,
@@ -282,9 +293,8 @@ const getPokemonsApi = async (req, res, next) => {
                     }
                 }
             )
+
         }
-
-
 
 
         /* Pudimos traer los datos desde la base de datos, venian desordenados entonces creamos un form que es pokemonElement
@@ -336,8 +346,6 @@ const getUsers = async (req, res, next) => {
     }
 }
 
-
-/* LOGIN DE USUARIOS, casi terminado, testeando. */
 const login = async (req, res, next) => {
     try {
         const { mail, password } = req.body
@@ -370,7 +378,6 @@ const login = async (req, res, next) => {
         if (!validPassword) {
             return res.status(401).json({ success: false, data: [], message: "Quien sos?" })
         }
-
 
         const token = jwt.sign({
             name: user.rows[0].name,
