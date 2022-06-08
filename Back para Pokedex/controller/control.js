@@ -242,7 +242,7 @@ const pokemons = [
 
 const getPokemonsApi = async (req, res, next) => {
     try {
-        const pokemonsApiFromSql = await db.query("SELECT * FROM pokemons po INNER JOIN elements el ON po.elemento_1 = el.id_elements INNER JOIN elements e ON po.elemento_2 = e.id_elements INNER JOIN about ab ON po.id_about = ab.id_about INNER JOIN baseStats bs ON po.id_baseStats = bs.id_baseStats");
+        const pokemonsApiFromSql = await db.query("SELECT * FROM pokemons po INNER JOIN about ab ON po.id_about = ab.id_about INNER JOIN baseStats bs ON po.id_baseStats = bs.id_baseStats");
         let pokemonElement = []
 
         for (let index = 0; index < pokemonsApiFromSql.rows.length; index++) {
@@ -251,10 +251,8 @@ const getPokemonsApi = async (req, res, next) => {
             from rel_pokemons_elements, elements, pokemons 
             where rel_pokemons_elements.pokemon_id = pokemons.id 
             and rel_pokemons_elements.element_id = elements.id_elements
-            and rel_pokemons_elements.pokemon_id = $1, $2`,
-                [pokemonsApiFromSql.rows[index].name_pokemon,
-                pokemonsApiFromSql.rows[index].id_pokemon,
-                ]
+            and rel_pokemons_elements.pokemon_id = $1`,
+                [pokemonsApiFromSql.rows[index].id]
             )
             pokemonElement.push(
                 {
@@ -263,8 +261,8 @@ const getPokemonsApi = async (req, res, next) => {
                     name: pokemonsApiFromSql.rows[index].name_pokemon,
                     id: pokemonsApiFromSql.rows[index].id_pokemon,
                     elements: {
-                        element1: pokemonsApiFromSql.rows[index].nameelements,
-                        element2: pokemonsApiFromSql.rows[index].nameelements,
+                        element1: elements.rows[0].nameElements,
+                        element2: elements.rows[1].nameElements,
                     },
                     about: {
                         weight: pokemonsApiFromSql.rows[index].weight,
