@@ -3,6 +3,8 @@ const db = require("../db/index")
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 const { TOKEN_SECRET } = require("../middlewares/verify")
+const cors = require ("cors")
+
 
 
 
