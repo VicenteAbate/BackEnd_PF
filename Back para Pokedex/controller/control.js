@@ -309,6 +309,18 @@ const getPokemonsApi = async (req, res, next) => {
 };
 
 
+const createPokemonForApi =(req,res,next)=>{
+    try {
+        
+    } catch (error) {
+        
+    }
+}
+
+
+
+
+
 /* Get y post pokemon que funciona con array de objetos Pokemons */
 
 const getPokeObjetTest = (req, res, next) => {
