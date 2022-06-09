@@ -272,7 +272,7 @@ const getPokemonsApi = async (req, res, next) => {
 
                     img: pokemonsApiFromSql.rows[index].img,
                     name: pokemonsApiFromSql.rows[index].name_pokemon,
-                    id: pokemonsApiFromSql.rows[index].id_pokemon,
+                    id: pokemonsApiFromSql.rows[index].code,
                     elements: {
                         element1: element1,
                         element2: element2,
@@ -309,18 +309,39 @@ const getPokemonsApi = async (req, res, next) => {
 };
 
 // /* ESTE SERIA EL POST DE NUEVO POKEMON EN BASE DE DATOS.  */ 
-// const createPokemonForApi = () => {
-//     try {
-//         const newPoke = req.body
-//         const createdPokemon = await db.query("Insert into pokemons(name,id,info) values ($1,$2,$3)",[
-//             newPoke.name, newpoke.id, newpoke.info 
-//         ])
-//         return res.status(201).json({succes:true, data: createPokemon, message: "New Pokemon!"})
-//     } catch (error) {
-//         return next (error);  
-//     }
+const createPokemonForApi = async (req, res, next) => {
+    try {
+        const newPoke = req.body
 
-// };
+        const postBaseStats = await db.query("Insert into basestats (id_basestats,hp,atk,def,satk,sdef,spd) values (10,$1,$2,$3,$4,$5,$6)", [
+            newPoke.baseStats.hp, newPoke.baseStats.atk, newPoke.baseStats.def, newPoke.baseStats.satk, newPoke.baseStats.sdef, newPoke.baseStats.spd
+        ])
+
+        const postAbout = await db.query("Insert into about (id_about,weight,height,moves) values (10,$1,$2,$3)", [
+            newPoke.about.weight, newPoke.about.height, newPoke.about.moves
+        ])
+        const createdPokemon = await db.query("Insert into pokemons(code,img,name_pokemon,id_about,info_pokemon,id_basestats,id) values ($1,$2,$3,10,$4,10,10)", [
+            newPoke.id, newPoke.img, newPoke.name_pokemon, newPoke.info_pokemon
+        ])
+
+        const postElements = await db.query("Insert into elements (id_elements, nameelements) values (14,$1)", [
+            newPoke.elements.element1
+        ])
+        const relPokemonElements = await db.query("Insert into rel_pokemons_elements(id,element_id,pokemon_id) values (14,14,10)")
+        let postElements2 = {}
+        let relPokemonElements2 = {}
+        if (newPoke.elements.element2) {
+            postElements2 = await db.query("Insert into elements (id_elements, nameelements) values (15,$1)", [
+                newPoke.elements.element2
+            ])
+            relPokemonElements2 = await db.query("Insert into rel_pokemons_elements(id,element_id,pokemon_id) values (15,15,10)")
+        }
+
+        return res.status(201).json({ succes: true, data: postBaseStats, postAbout, postElements, postElements2, createdPokemon, relPokemonElements, relPokemonElements2, message: "New Pokemon!" })
+    } catch (error) {
+        return next(error);
+    }
+};
 
 
 
@@ -410,4 +431,4 @@ const login = async (req, res, next) => {
 
 
 
-module.exports = { getPokemonsApi, createPokemon, getUsers, login, getPokeObjetTest }
+module.exports = { getPokemonsApi, createPokemon, getUsers, login, getPokeObjetTest, createPokemonForApi }
