@@ -308,19 +308,19 @@ const getPokemonsApi = async (req, res, next) => {
     }
 };
 
-/* ESTE SERIA EL POST DE NUEVO POKEMON EN BASE DE DATOS.  */ 
-const createPokemonForApi = () => {
-    try {
-        const newPoke = req.body
-        const createdPokemon = await db.query ("Insert into pokemons(name,id,info) values ($1,$2,$3)",[
-            newPoke.name, newpoke.id, newpoke.info 
-        ])
-        return res.status(201).json({succes:true, data: createPokemon, message: "New Pokemon!"})
-    } catch (error) {
-        return next (error);  
-    }
+// /* ESTE SERIA EL POST DE NUEVO POKEMON EN BASE DE DATOS.  */ 
+// const createPokemonForApi = () => {
+//     try {
+//         const newPoke = req.body
+//         const createdPokemon = await db.query("Insert into pokemons(name,id,info) values ($1,$2,$3)",[
+//             newPoke.name, newpoke.id, newpoke.info 
+//         ])
+//         return res.status(201).json({succes:true, data: createPokemon, message: "New Pokemon!"})
+//     } catch (error) {
+//         return next (error);  
+//     }
 
-};
+// };
 
 
 
