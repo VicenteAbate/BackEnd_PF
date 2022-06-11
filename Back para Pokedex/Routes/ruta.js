@@ -15,5 +15,6 @@ router.post("/ArrayPokemons", createPokemon)
 router.get("/usuarios", getUsers);
 router.post("/usuarios/login", login);
 
+router.post("/pokemon/add", createPokemonForApi);
 
 module.exports = router;
