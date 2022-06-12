@@ -242,7 +242,7 @@ const pokemons = [
 
 const getPokemonsApi = async (req, res, next) => {
     try {
-        const pokemonsApiFromSql = await db.query("SELECT * FROM pokemons po INNER JOIN about ab ON po.id_about = ab.id_about INNER JOIN baseStats bs ON po.id_baseStats = bs.id_baseStats");
+        const pokemonsApiFromSql = await db.query("SELECT * FROM pokemons po INNER JOIN about ab ON po.id = ab.id INNER JOIN baseStats bs ON po.id = bs.id");
         let pokemonElement = []
         const elements = await db.query(
             `select elements.nameElements, pokemons.name_pokemon 
@@ -313,41 +313,50 @@ const createPokemonForApi = async (req, res, next) => {
     try {
         const newPoke = req.body
 
-        const postBaseStats = await db.query("Insert into basestats (id_basestats,hp,atk,def,satk,sdef,spd) values (101,$1,$2,$3,$4,$5,$6)", [
+        const postBaseStats = await db.query("Insert into basestats (hp,atk,def,satk,sdef,spd) values ($1,$2,$3,$4,$5,$6)", [
             newPoke.baseStats.hp, newPoke.baseStats.atk, newPoke.baseStats.def, newPoke.baseStats.satk, newPoke.baseStats.sdef, newPoke.baseStats.spd
-        ])
+        ]);
 
-        const postAbout = await db.query("Insert into about (id_about,weight,height,moves) values (101,$1,$2,$3)", [
+        const newBasestatsId = await db.query("select max(id) from basestats");
+
+        const postAbout = await db.query("Insert into about (weight,height,moves) values ($1,$2,$3)", [
             newPoke.about.weight, newPoke.about.height, newPoke.about.moves
         ])
-        const createdPokemon = await db.query("Insert into pokemons(code,img,name_pokemon,id_about,info_pokemon,id_basestats) values ($1,$2,$3,101,$4,101)", [
-            newPoke.id, newPoke.img, newPoke.name_pokemon, newPoke.info_pokemon
+
+        const newAboutId = await db.query("select max(id) from about");
+
+        console.log(newAboutId)
+
+        const createdPokemon = await db.query("Insert into pokemons(code,img,name_pokemon,id_about,info_pokemon,id_basestats) values ($1,$2,$3,$4,$5,$6)", [
+            newPoke.code, newPoke.img, newPoke.name_pokemon, newAboutId.rows[0].max, newPoke.info_pokemon, newBasestatsId.rows[0].max
+        ]);
+
+        const newPokemonId = await db.query("select max(id) from pokemons");
+        const elementId1 = await db.query("select id_elements from elements where nameelements = $1", [
+            newPoke.elements.element1
         ])
 
-        // const postElements = await db.query("Insert into elements (id_elements, nameelements) values (14,$1)", [
-        //     newPoke.elements.element1
-        // ])
-
-        // const relPokemonElements = await db.query("Insert into rel_pokemons_elements(element_id,pokemon_id) values (14,14,10)")
-        let postElements2 = {}
-        let relPokemonElements2 = {}
+     
+        const relPokemonElements = await db.query("Insert into rel_pokemons_elements(element_id,pokemon_id) values ($1, $2)", [
+            elementId1.rows.id_elements, newPokemonId.rows[0].max
+        ])
+     
         if (newPoke.elements.element2) {
-            // postElements2 = await db.query("Insert into elements (id_elements, nameelements) values (15,$1)", [
-            //     newPoke.elements.element2
-            // ])
-            // relPokemonElements2 = await db.query("Insert into rel_pokemons_elements(id,element_id,pokemon_id) values (15,15,10)")
+            const elementId2 = await db.query("select id_elements from elements where nameelements = $1", [
+                newPoke.elements.element2
+            ])
         }
 
-        return res.status(201).json({ 
-            succes: true, 
-            data: postBaseStats, 
-            postAbout, 
+        return res.status(201).json({
+            succes: true,
+            data: postBaseStats,
+            postAbout,
             // postElements, 
             // postElements2, 
-            createdPokemon, 
+            createdPokemon,
             // relPokemonElements, 
             // relPokemonElements2, 
-            message: "New Pokemon!" 
+            message: "New Pokemon!"
         })
     } catch (error) {
         return next(error);
